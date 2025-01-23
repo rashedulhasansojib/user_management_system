@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2>User Management</h2>
+        <form id="user-management-form" method="POST">
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th scope="col">
+                            <input type="checkbox" id="select-all">
+                        </th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Last Seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="userIds[]" value="{{ user.id }}">
+                            </td>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge {{ user.status == 'active' ? 'bg-success' : 'bg-danger' }}">
+                                    {{ user.status }}
+                                </span>
+                            </td>
+                            <td>{{ user.lastLogin|date('Y-m-d H:i:s') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="d-flex justify-content-between mt-3">
+                <button type="submit" formaction="{{ path('user_block') }}" class="btn btn-warning">Block</button>
+                <button type="submit" formaction="{{ path('user_unblock') }}" class="btn btn-warning">UnBlock</button>
+
+                <button type="submit" formaction="{{ path('user_delete') }}" class="btn btn-danger">Delete</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Select/Deselect all checkboxes
+        document.getElementById('select-all').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('input[name="userIds[]"]');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+{# {% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>User Management</h1>
+
+<form id="user-management-form" method="post" action="{{ path('block_users') }}">
+    <table class="table">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Last Login</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><input type="checkbox" class="user-checkbox" name="userIds[]" value="{{ user.id }}"></td>
+                <td>{{ user.name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.lastLogin ? user.lastLogin|date('Y-m-d H:i') : 'Never' }}</td>
+                <td>{{ user.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit" class="btn btn-danger">Block Selected</button>
+</form>
+
+<form id="delete-user-form" method="post" action="{{ path('delete_users') }}">
+    <button type="submit" class="btn btn-warning">Delete Selected</button>
+</form>
+
+<script>
+    document.getElementById('select-all').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.user-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>
+{% endblock %} #}
