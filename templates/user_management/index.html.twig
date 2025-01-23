@@ -3,6 +3,13 @@
 {% block body %}
     <div class="container mt-4">
         <h2>User Management</h2>
+         
+
+    {% if app.user %}
+        <div class="mb-3">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
+        </div>
+    {% endif %}
         <form id="user-management-form" method="POST">
             <table class="table table-bordered">
                 <thead class="thead-light">
