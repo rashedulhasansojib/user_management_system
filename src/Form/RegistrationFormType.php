@@ -12,6 +12,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class RegistrationFormType extends AbstractType
 {
@@ -23,6 +27,14 @@ class RegistrationFormType extends AbstractType
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email', // Optional: Customize the label
+                'constraints' => [
+                    new NotBlank([
+                        'message' => 'Please enter your email',
+                    ]),
+                    new EmailConstraint([
+                        'message' => 'Please enter a valid email address',
+                    ]),
+                ],
             ])
             // ->add('agreeTerms', CheckboxType::class, [
             //     'mapped' => false,
@@ -33,7 +45,6 @@ class RegistrationFormType extends AbstractType
             //     ],
             // ])
             ->add('plainPassword', PasswordType::class, [
-                // This field is not mapped to the User entity directly
                 'mapped' => false,
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
@@ -43,17 +54,34 @@ class RegistrationFormType extends AbstractType
                     new Length([
                         'min' => 6,
                         'minMessage' => 'Your password should be at least {{ limit }} characters',
-                        // max length allowed by Symfony for security reasons
                         'max' => 4096,
                     ]),
                 ],
             ])
             ->add('repeatPassword', PasswordType::class, [
-                'mapped' => false, // This field is not mapped to the entity
+                'mapped' => false,
                 'constraints' => [
-                    new NotBlank(),
+                    new NotBlank([
+                        'message' => 'Please repeat your password',
+                    ]),
                 ],
             ]);
+
+        // Add a listener for the form submission
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+            $form = $event->getForm();
+            $data = $form->getData();
+
+            // Get the plain password and repeat password
+            $plainPassword = $form->get('plainPassword')->getData();
+            $repeatPassword = $form->get('repeatPassword')->getData();
+
+            // Check if the passwords match
+            if ($plainPassword !== $repeatPassword) {
+                // Add a violation to the repeatPassword field
+                $form->get('repeatPassword')->addError(new \Symfony\Component\Form\FormError('The passwords must match.'));
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -33,6 +33,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
+    public function findAllSorted(string $sortField = 'id', string $sortOrder = 'ASC'): array
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.' . $sortField, $sortOrder)
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return User[] Returns an array of User objects
     //     */

@@ -23,12 +23,36 @@ class UserManagementController extends AbstractController
     }
 
     #[Route('/user-management', name: 'user_management')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $users = $this->userRepository->findAll();
+        // Check if the user is logged in
+        if (!$this->getUser()) {
+            // Redirect to the login page if not authenticated
+            return $this->redirectToRoute('app_login');
+        }
+        // Get sorting parameters from the request
+        $sortField = $request->query->get('sort', 'id'); // Default sort by 'id'
+        $sortOrder = $request->query->get('order', 'ASC'); // Default order is 'ASC'
+
+        // Validate sort field and order
+        $validSortFields = ['id', 'name', 'email', 'status', 'lastLogin'];
+        $validSortOrders = ['ASC', 'DESC'];
+
+        if (!in_array($sortField, $validSortFields)) {
+            $sortField = 'id'; // Fallback to default
+        }
+
+        if (!in_array($sortOrder, $validSortOrders)) {
+            $sortOrder = 'ASC'; // Fallback to default
+        }
+
+        // Fetch sorted users
+        $users = $this->userRepository->findAllSorted($sortField, $sortOrder);
 
         return $this->render('user_management/index.html.twig', [
             'users' => $users,
+            'sortField' => $sortField,
+            'sortOrder' => $sortOrder,
         ]);
     }
 
@@ -103,78 +127,3 @@ class UserManagementController extends AbstractController
         return $this->redirectToRoute('user_management');
     }
 }
-
-
-
-// namespace App\Controller;
-
-// use App\Entity\User;
-// use Doctrine\ORM\EntityManagerInterface;
-// use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-// use Symfony\Component\HttpFoundation\Request;
-// use Symfony\Component\HttpFoundation\Response;
-// use Symfony\Component\Routing\Attribute\Route;
-
-// class UserManagementController extends AbstractController
-// {
-//     #[Route('/user-management', name: 'user_management')]
-//     public function index(EntityManagerInterface $entityManager): Response
-//     {
-//         // Fetch all users from the database
-//         $users = $entityManager->getRepository(User::class)->findAll();
-
-//         // Render the user management view with the list of users
-//         return $this->render('user_management/index.html.twig', [
-//             'users' => $users,
-//         ]);
-//     }
-
-//     #[Route('/user-management/block', name: 'block_users', methods: ['POST'])]
-//     public function blockUsers(Request $request, EntityManagerInterface $entityManager): Response
-//     {
-//         $userIds = $request->request->get('userIds');
-
-//         // Check if userIds is an array and not empty
-//         if (!is_array($userIds) || empty($userIds)) {
-//             $this->addFlash('error', 'No users selected.');
-//             return $this->redirectToRoute('user_management');
-//         }
-
-//         // Block selected users
-//         foreach ($userIds as $id) {
-//             $user = $entityManager->getRepository(User::class)->find($id);
-//             if ($user) {
-//                 $user->setStatus('blocked');
-//                 $entityManager->persist($user);
-//             }
-//         }
-//         $entityManager->flush();
-
-//         $this->addFlash('success', 'Selected users have been blocked.');
-//         return $this->redirectToRoute('user_management');
-//     }
-
-//     #[Route('/user-management/delete', name: 'delete_users', methods: ['POST'])]
-//     public function deleteUsers(Request $request, EntityManagerInterface $entityManager): Response
-//     {
-//         $userIds = $request->request->get('userIds');
-
-//         // Check if userIds is an array and not empty
-//         if (!is_array($userIds) || empty($userIds)) {
-//             $this->addFlash('error', 'No users selected.');
-//             return $this->redirectToRoute('user_management');
-//         }
-
-//         // Delete selected users
-//         foreach ($userIds as $id) {
-//             $user = $entityManager->getRepository(User::class)->find($id);
-//             if ($user) {
-//                 $entityManager->remove($user);
-//             }
-//         }
-//         $entityManager->flush();
-
-//         $this->addFlash('success', 'Selected users have been deleted.');
-//         return $this->redirectToRoute('user_management');
-//     }
-// }

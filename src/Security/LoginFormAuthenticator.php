@@ -60,9 +60,13 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $token->getUser()->getUserIdentifier()]);
 
         if ($user) {
-            $user->setLastLogin(new \DateTime());
+            $currentTime = new \DateTime();
+            $user->setLastLogin($currentTime);
             $this->entityManager->persist($user);
             $this->entityManager->flush();
+
+            // Log the last login time
+            error_log(sprintf("User  %s logged in at %s", $user->getEmail(), $currentTime->format('Y-m-d H:i:s')));
         }
 
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
