@@ -26,7 +26,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 RUN composer remove symfony/maker-bundle --no-update || true
 
 # Set proper permissions for cache and logs
-RUN chmod -R 777 var/cache var/log
+RUN mkdir -p var/cache var/log && \
+    chmod -R 775 var/cache var/log && \
+    chown -R www-data:www-data var/cache var/log
 
 # Expose the application port
 EXPOSE 8000

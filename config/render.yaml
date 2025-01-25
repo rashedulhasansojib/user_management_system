@@ -11,3 +11,7 @@ services:
         value: "mysql://root:@127.0.0.1:3306/ums?serverVersion=10.4.27-MariaDB&charset=utf8mb4"
       - key: APP_SECRET
         value: "YOUR_SECRET_HERE"
+buildCommand: |
+  composer install --no-dev --optimize-autoloader
+  php bin/console cache:clear --env=prod
+  php bin/console cache:warmup --env=prod
