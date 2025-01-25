@@ -1,31 +1,27 @@
-# Use an official PHP image with Apache
-FROM php:8.2-apache
+# Use the official PHP image
+FROM php:8.2-cli
 
-# Install system dependencies and PHP extensions
+# Install required system dependencies
 RUN apt-get update && apt-get install -y \
-    git zip unzip libicu-dev libpq-dev libzip-dev libpng-dev && \
-    docker-php-ext-install intl pdo pdo_mysql zip gd
+    zip unzip git curl libicu-dev libpq-dev libonig-dev && \
+    docker-php-ext-install intl pdo pdo_pgsql
 
-# Enable Apache mod_rewrite for Symfony
-RUN a2enmod rewrite
+# Set the working directory
+WORKDIR /app
 
-# Install Composer globally
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Set working directory
-WORKDIR /var/www/html
-
-# Copy the Symfony project files
+# Copy project files
 COPY . .
 
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Install Symfony dependencies
-RUN composer install --no-dev --optimize-autoloader
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer install --no-dev --optimize-autoloader --no-scripts && \
+    composer run-script auto-scripts
 
 # Set proper permissions for cache and logs
-RUN chown -R www-data:www-data /var/www/html/var
+RUN chmod -R 777 var/cache var/log
 
-# Expose the default port
-EXPOSE 80
-
-# Start Apache server
-CMD ["apache2-foreground"]
+# Set the entrypoint
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
