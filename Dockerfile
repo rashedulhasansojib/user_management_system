@@ -15,14 +15,21 @@ COPY . .
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Clear Composer cache
+RUN composer clear-cache
+
 # Install Symfony dependencies
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer require symfony/maker-bundle --dev && \
-    composer install --no-dev --optimize-autoloader --no-scripts && \
-    composer remove symfony/maker-bundle
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Remove MakerBundle if not needed in production
+RUN composer remove symfony/maker-bundle --no-update || true
 
 # Set proper permissions for cache and logs
 RUN chmod -R 777 var/cache var/log
 
-# Set the entrypoint
+# Expose the application port
+EXPOSE 8000
+
+# Run Symfony server
 CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]

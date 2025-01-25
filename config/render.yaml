@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: symfony-app
+    env: docker
+    plan: free # Or other plan
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: DATABASE_URL
+        value: "mysql://root:@127.0.0.1:3306/ums?serverVersion=10.4.27-MariaDB&charset=utf8mb4"
+      - key: APP_SECRET
+        value: "YOUR_SECRET_HERE"
