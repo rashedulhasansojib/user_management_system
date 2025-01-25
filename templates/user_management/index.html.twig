@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}
+	User Management
+{% endblock %}
+
 {% block body %}
 
 	{{ include('home/header.html.twig') }}
@@ -68,13 +72,36 @@
 									{{ user.status }}
 								</span>
 							</td>
-							<td>{{ user.lastLogin ? user.lastLogin|date('Y-m-d H:i') : 'Never' }}</td>
+							<td class="last-seen">
+								{{ user.lastLogin ? user.lastLogin|date('Y-m-d H:i') : 'Never' }}
+							</td>
 						</tr>
 					{% endfor %}
 				</tbody>
 			</table>
 		</form>
 	</div>
+
+	<nav aria-label="Page navigation example">
+		<ul class="pagination justify-content-center">
+			<li class="page-item disabled">
+				<a class="page-link">Previous</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="#">1</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="#">2</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="#">3</a>
+			</li>
+			<li class="page-item">
+				<a class="page-link" href="#">Next</a>
+			</li>
+		</ul>
+	</nav>
+
 
 	<script>
 		// Select/Deselect all checkboxes
@@ -91,6 +118,21 @@ alert.classList.remove('show');
 alert.classList.add('fade');
 });
 }, 3000);
+
+
+document.addEventListener("DOMContentLoaded", function () {
+const lastSeenElements = document.querySelectorAll('.last-seen'); // Get all last-seen elements
+lastSeenElements.forEach((element) => {
+const dateText = element.textContent.trim(); // Get the date text
+if (dateText !== "Never") {
+const relativeTime = dayjs(dateText).fromNow(); // Convert to relative time
+console.log(relativeTime);
+element.textContent = relativeTime; // Update the text content
+}
+});
+});
 	</script>
+
+	{{ include('home/footer.html.twig') }}
 
 {% endblock %}
