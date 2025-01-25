@@ -17,8 +17,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Install Symfony dependencies
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --optimize-autoloader --no-scripts && \
-    composer run-script auto-scripts
+RUN composer require symfony/maker-bundle --dev && \
+    composer install --no-dev --optimize-autoloader --no-scripts && \
+    composer remove symfony/maker-bundle
 
 # Set proper permissions for cache and logs
 RUN chmod -R 777 var/cache var/log
